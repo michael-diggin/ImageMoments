@@ -32,9 +32,12 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="include/moments.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="moments.cpp" />
-		<Unit filename="moments.h" />
+		<Unit filename="moments.hpp" />
+		<Unit filename="tests/catch.hpp" />
+		<Unit filename="tests/test.cpp" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
