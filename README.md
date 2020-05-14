@@ -1,2 +1,2 @@
 # ImageMoments
-Fast and Accurate calculation of raw image moments
+Accurate calculation of raw image moments with O(N+M) multiplications
