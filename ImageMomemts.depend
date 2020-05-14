@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1589483661 source:c:\users\md705\onedrive\documents\cpp\imagemomemts\main.cpp
+	<iostream>
+	<vector>
+	<numeric>
+	<opencv2\highgui\highgui.hpp>
+	<opencv2\core\core.hpp>
+	<opencv2\opencv.hpp>
+	"moments.h"
+
+1589441523 source:c:\users\md705\onedrive\documents\cpp\imagemomemts\timer.cpp
+	<chrono>
+	"timer.h"
+
+1589441171 c:\users\md705\onedrive\documents\cpp\imagemomemts\timer.h
+
+1589484009 source:c:\users\md705\onedrive\documents\cpp\imagemomemts\moments.cpp
+	<iostream>
+	<vector>
+	<numeric>
+	<opencv2\highgui\highgui.hpp>
+	<opencv2\core\core.hpp>
+	<opencv2\opencv.hpp>
+
+1589483873 c:\users\md705\onedrive\documents\cpp\imagemomemts\moments.h
+
