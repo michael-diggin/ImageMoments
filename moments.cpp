@@ -8,20 +8,17 @@
 using namespace std;
 using namespace cv;
 
-Moments get_moments(const Mat& image)
+Moments drt_moments(const Mat& image)
 {
 
     Size s = image.size();
-    if ( s.width <=0 || s.height <=0 ){
-        Moments zero_m;
-        return zero_m;
-    }
+
 
     //projection arrays
-    vector<int> vert(s.width, 0);
-    vector<int> hor(s.height, 0);
-    vector<int> diag(s.width+s.height, 0);
-    vector<int> anti(s.width+s.height, 0);
+    vector<double> vert(s.width+s.height, 0);
+    vector<double> hor(s.height+s.height, 0);
+    vector<double> diag(s.width+s.height, 0);
+    vector<double> anti(s.width+s.height, 0);
 
 
 
@@ -43,18 +40,40 @@ Moments get_moments(const Mat& image)
     // loop through image by pixel values
     double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
 
+    double t = (double)getTickCount();
+
+    double* vptr = &vert[0];
+    double* inithptr = &hor[0];
+    double* hptr;
+    double* dptr;
+    double* aptr;
+
     for (int i=0; i< s.width; i++)
     {
+        hptr = inithptr;
+        dptr = &diag[i];
+        aptr = &anti[s.width-1-i];
         const uchar* p = image.ptr<uchar>(i);
         for (int j=0; j<s.height; j++)
         {
-            vert[i] += p[j];
-            hor[j] += p[j];
-            diag[i+j] += p[j];
-            int k = s.width -1 + j - i;
-            anti[k] += p[j];
+            *vptr += *p;
+            *hptr += *p;
+            *dptr += *p;
+            *aptr += *p;
+
+            hptr += 1;
+            dptr += 1;
+            aptr += 1;
+            p += 1;
         }
+
+        vptr += 1;
+
     }
+
+    t = ((double)getTickCount() -t)/getTickFrequency();
+    cout << "DRT Loop Time: " << t << endl;
+
 
     m00 = accumulate(begin(vert), end(vert), 0.0);
     m10 = inner_product(begin(hor), end(hor), begin(d1), 0.0);
@@ -71,4 +90,55 @@ Moments get_moments(const Mat& image)
 
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
     return m;
+}
+
+
+Moments opencv_moments(const Mat& image)
+{
+
+    Size s = image.size();
+
+
+    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
+
+    double t = (double)getTickCount();
+
+    for(int y = 0; y < s.height; y++ )
+    {
+        const uchar* ptr = image.ptr<uchar>(y);
+        int x0 = 0, x1 = 0, x2 = 0;
+        int x3 = 0;
+
+        for(int x=0; x < s.width; x++ )
+        {
+            int p = ptr[x];
+            int xp = x * p, xxp;
+
+            x0 += p;
+            x1 += xp;
+            xxp = xp * x;
+            x2 += xxp;
+            x3 += xxp * x;
+        }
+
+        int py = y * x0, sy = y*y;
+
+        m03 += py * sy;  // m03
+        m12 += x1 * sy;  // m12
+        m21 += x2 * y;  // m21
+        m30 += x3;             // m30
+        m02 += x0 * sy;        // m02
+        m11 += x1 * y;         // m11
+        m20 += x2;             // m20
+        m01 += py;             // m01
+        m10 += x1;             // m10
+        m00 += x0;             // m00
+    }
+
+    t = ((double)getTickCount() -t)/getTickFrequency();
+    cout << "OCV Loop Time: " << t << endl;
+
+    Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
+    return m;
+
 }
