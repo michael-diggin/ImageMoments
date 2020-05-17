@@ -5,6 +5,7 @@
 #include <opencv2\core\core.hpp>
 #include <opencv2\opencv.hpp>
 
+
 using namespace std;
 using namespace cv;
 
@@ -12,68 +13,73 @@ Moments drt_moments(const Mat& image)
 {
 
     Size s = image.size();
+    int width = s.width;
+    int height = s.height;
 
 
     //projection arrays
-    vector<double> vert(s.width+s.height, 0);
-    vector<double> hor(s.height+s.height, 0);
-    vector<double> diag(s.width+s.height, 0);
-    vector<double> anti(s.width+s.height, 0);
+    vector<int> vert(width, 0);
+    vector<int> hor(height, 0);
+    vector<int> diag(width+height, 0);
+    vector<int> anti(width+height, 0);
 
 
 
     //power arrays
-    vector<int> d1(s.width+s.height, 0);
-    vector<int> d2(s.width+s.height, 0);
-    vector<int> d3(s.width+s.height, 0);
-    vector<int> a3(s.width+s.height, 0);
+    vector<int> d1(width+height, 0);
+    vector<int> d2(width+height, 0);
+    vector<double> d3(width+height, 0);
+    vector<double> a3(width+height, 0);
 
-
-    for (int k=0; k<s.height+s.width; k++)
+    for (int k=0; k<height+width; ++k)
     {
         d1[k] = k;
-        d2[k] = pow(k, 2);
-        d3[k] = d2[k]*k;
-        a3[k] = pow((k - s.width + 1), 3);
+        int k2 = k*k;
+        d2[k] = k2;
+        d3[k] = k2*k;
+        a3[k] = pow((k - width + 1), 3);
     }
 
     // loop through image by pixel values
-    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
+
 
     double t = (double)getTickCount();
 
-    double* vptr = &vert[0];
-    double* inithptr = &hor[0];
-    double* hptr;
-    double* dptr;
-    double* aptr;
+    int* hptr = &hor[0];
+    int* initvptr = &vert[0];
+    int* vptr;
+    int* dptr;
+    int* aptr;
+    int _p;
 
-    for (int i=0; i< s.width; i++)
+    for (int i=0; i< height; ++i)
     {
-        hptr = inithptr;
+        vptr = initvptr;
         dptr = &diag[i];
-        aptr = &anti[s.width-1-i];
+        aptr = &anti[width-1+i];
         const uchar* p = image.ptr<uchar>(i);
-        for (int j=0; j<s.height; j++)
+        const uchar* p_end = p + width;
+        for (; p<p_end; ++p)
         {
-            *vptr += *p;
-            *hptr += *p;
-            *dptr += *p;
-            *aptr += *p;
+            _p = *p;
+            *vptr += _p;
+            *hptr += _p;
+            *dptr += _p;
+            *aptr += _p;
 
-            hptr += 1;
-            dptr += 1;
-            aptr += 1;
-            p += 1;
+            ++vptr;
+            ++dptr;
+            --aptr;
         }
 
-        vptr += 1;
+        ++hptr;
 
     }
 
     t = ((double)getTickCount() -t)/getTickFrequency();
     cout << "DRT Loop Time: " << t << endl;
 
+    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
 
     m00 = accumulate(begin(vert), end(vert), 0.0);
     m10 = inner_product(begin(hor), end(hor), begin(d1), 0.0);
@@ -82,7 +88,7 @@ Moments drt_moments(const Mat& image)
     m02 = inner_product(begin(vert), end(vert), begin(d2), 0.0);
     m30 = inner_product(begin(hor), end(hor), begin(d3), 0.0);
     m03 = inner_product(begin(vert), end(vert), begin(d3), 0.0);
-    m11 = inner_product(begin(diag), end(diag), begin(d2), 0.0)/2.0 - m02/2.0 - m20/2.0;
+    m11 = (inner_product(begin(diag), end(diag), begin(d2), 0.0) - m02 - m20)/2.0;
     double temp_1 = inner_product(begin(diag), end(diag), begin(d3), 0.0)/6.0;
     double temp_2 = inner_product(begin(anti), end(anti), begin(a3), 0.0)/6.0;
     m12 = temp_1 + temp_2 - m30/3.0;

@@ -1,3 +1,8 @@
+# code blocks 
+*.cbp
+*.layout
+*.depends
+
 # Prerequisites
 *.d
 
