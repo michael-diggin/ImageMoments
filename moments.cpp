@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <functional>
+#include <algorithm>
 #include <opencv2\highgui\highgui.hpp>
 #include <opencv2\core\core.hpp>
 #include <opencv2\opencv.hpp>
@@ -52,6 +54,7 @@ Moments drt_moments(const Mat& image)
     int* aptr;
     int _p;
 
+
     for (int i=0; i< height; ++i)
     {
         vptr = initvptr;
@@ -59,6 +62,7 @@ Moments drt_moments(const Mat& image)
         aptr = &anti[width-1+i];
         const uchar* p = image.ptr<uchar>(i);
         const uchar* p_end = p + width;
+
         for (; p<p_end; ++p)
         {
             _p = *p;
@@ -147,4 +151,45 @@ Moments opencv_moments(const Mat& image)
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
     return m;
 
+}
+
+
+Moments old_moments(const Mat& image)
+{
+    Size s = image.size();
+
+    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
+
+    double t = (double)getTickCount();
+
+    for(int y = 0; y < s.height; y++ )
+    {
+        const uchar* ptr = image.ptr<uchar>(y);
+
+        for(int x=0; x < s.width; x++ )
+        {
+            int p = ptr[x];
+            int xp = x * p, xxp;
+            int yp = y*p, yy;
+
+            m00 += p;
+            m10 += xp;
+            m01 += yp;
+            m11 += xp*y;
+            xxp = xp * x;
+            yy = y*y;
+            m20 += xxp;
+            m02 += yy*p;
+            m30 += xxp * x;
+            m21 += xxp*y;
+            m12 += xp*yy;
+            m03 += yy*yp;
+        }
+    }
+
+    t = ((double)getTickCount() -t)/getTickFrequency();
+    cout << "OLD Loop Time: " << t << endl;
+
+    Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
+    return m;
 }

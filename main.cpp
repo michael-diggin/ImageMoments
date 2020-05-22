@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
-#include <opencv2\highgui\highgui.hpp>
+#include <opencv2\highgui.hpp>
 #include <opencv2\core\core.hpp>
 #include <opencv2\opencv.hpp>
 #include "moments.hpp"
@@ -12,7 +12,7 @@ using namespace cv;
 int main() {
 
     Mat image;
-	image = imread("ChiswickBridge.jpg", IMREAD_GRAYSCALE);
+	image = imread("grayscale.jpg", IMREAD_GRAYSCALE);
 	if (!image.data)
     {
         cout << "Could not find image" << endl;
