@@ -11,27 +11,29 @@
 using namespace std;
 using namespace cv;
 
+double product(const vector<long> &mat, double power[], int many)
+{
+    double sum = 0.0;
+    for(int i = 0; i < many; i++)
+        sum += static_cast<double>(mat[i]) * power[i];
+
+    return sum;
+}
+
 Moments drt_moments(const Mat& image)
 {
 
     Size s = image.size();
-    int width = s.width;
-    int height = s.height;
+    const int width = s.width;
+    const int height = s.height;
 
-
-    //projection arrays
-    vector<int> vert(width, 0);
-    vector<int> hor(height, 0);
-    vector<int> diag(width+height, 0);
-    vector<int> anti(width+height, 0);
-
-
+    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
 
     //power arrays
-    vector<int> d1(width+height, 0);
-    vector<int> d2(width+height, 0);
-    vector<double> d3(width+height, 0);
-    vector<double> a3(width+height, 0);
+    double *d1 = new double [width+height];
+    double *d2 = new double [width+height];
+    double *d3 = new double [width+height];
+    double *a3 = new double [width+height];
 
     for (int k=0; k<height+width; ++k)
     {
@@ -43,65 +45,61 @@ Moments drt_moments(const Mat& image)
     }
 
     // loop through image by pixel values
+    //projection arrays
+    vector<long> vert(width, 0);
+    vector<long> hor(height, 0);
+    vector<long> diag(width+height, 0);
+    vector<long> anti(width+height, 0);
 
-
-    double t = (double)getTickCount();
-
-    int* hptr = &hor[0];
-    int* initvptr = &vert[0];
-    int* vptr;
-    int* dptr;
-    int* aptr;
-    int _p;
-
+    long* hptr = &hor[0];
+    long* initvptr = &vert[0];
+    long* vptr;
+    long* dptr;
+    long* aptr;
 
     for (int i=0; i< height; ++i)
     {
         vptr = initvptr;
         dptr = &diag[i];
-        aptr = &anti[width-1+i];
+        aptr = &anti[height-1-i];
         const uchar* p = image.ptr<uchar>(i);
-        const uchar* p_end = p + width;
 
-        for (; p<p_end; ++p)
+        long h = 0;
+
+        for(int j = 0; j < width; ++j)
         {
-            _p = *p;
-            *vptr += _p;
-            *hptr += _p;
-            *dptr += _p;
-            *aptr += _p;
-
-            ++vptr;
-            ++dptr;
-            --aptr;
+            vptr[j] += p[j];
+            h += p[j];
+            dptr[j] += p[j];
+            aptr[j] += p[j];
         }
-
-        ++hptr;
+        hptr[i] = h;
 
     }
 
-    t = ((double)getTickCount() -t)/getTickFrequency();
-    cout << "DRT Loop Time: " << t << endl;
-
-    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
-
     m00 = accumulate(begin(vert), end(vert), 0.0);
-    m10 = inner_product(begin(hor), end(hor), begin(d1), 0.0);
-    m01 = inner_product(begin(vert), end(vert), begin(d1), 0.0);
-    m20 = inner_product(begin(hor), end(hor), begin(d2), 0.0);
-    m02 = inner_product(begin(vert), end(vert), begin(d2), 0.0);
-    m30 = inner_product(begin(hor), end(hor), begin(d3), 0.0);
-    m03 = inner_product(begin(vert), end(vert), begin(d3), 0.0);
-    m11 = (inner_product(begin(diag), end(diag), begin(d2), 0.0) - m02 - m20)/2.0;
-    double temp_1 = inner_product(begin(diag), end(diag), begin(d3), 0.0)/6.0;
-    double temp_2 = inner_product(begin(anti), end(anti), begin(a3), 0.0)/6.0;
+
+    m10 = product(vert, d1, width);
+    m01 = product(hor, d1, height);
+
+    m20 = product(vert, d2, width);
+    m02 = product(hor, d2, height);
+
+    m30 = product(vert, d3, width);
+    m03 = product(hor, d3, height);
+
+    m11 = (product(diag, d2, width+height) - m02 - m20) / 2.0;
+
+    double temp_1 = product(diag, d3, width+height) / 6.0;
+    double temp_2 = product(anti, a3, width+height) / 6.0;
+
     m12 = temp_1 + temp_2 - m30/3.0;
     m21 = temp_1 - temp_2 - m03/3.0;
 
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
+
     return m;
 }
-
 
 Moments opencv_moments(const Mat& image)
 {
@@ -109,20 +107,21 @@ Moments opencv_moments(const Mat& image)
     Size s = image.size();
 
 
-    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
+    double m00 = 0.0, m01 = 0.0, m10 = 0.0, m11 = 0.0, m20 = 0.0, m02 = 0.0;
+    double m30 = 0.0, m12 = 0.0, m21 = 0.0, m03 = 0.0;
 
-    double t = (double)getTickCount();
+    //double t = (double)getTickCount();
 
     for(int y = 0; y < s.height; y++ )
     {
         const uchar* ptr = image.ptr<uchar>(y);
-        int x0 = 0, x1 = 0, x2 = 0;
-        int x3 = 0;
+        long x0 = 0;
+        double x1 = 0.0, x2 = 0.0, x3 = 0.0;
 
         for(int x=0; x < s.width; x++ )
         {
-            int p = ptr[x];
-            int xp = x * p, xxp;
+            int p = *(ptr++);
+            double xp = x * p, xxp;
 
             x0 += p;
             x1 += xp;
@@ -131,7 +130,7 @@ Moments opencv_moments(const Mat& image)
             x3 += xxp * x;
         }
 
-        int py = y * x0, sy = y*y;
+        double py = y * x0, sy = y*y;
 
         m03 += py * sy;  // m03
         m12 += x1 * sy;  // m12
@@ -145,8 +144,8 @@ Moments opencv_moments(const Mat& image)
         m00 += x0;             // m00
     }
 
-    t = ((double)getTickCount() -t)/getTickFrequency();
-    cout << "OCV Loop Time: " << t << endl;
+    //t = ((double)getTickCount() -t)/getTickFrequency();
+    //cout << "OCV Loop Time: " << t << endl;
 
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
     return m;
@@ -158,9 +157,10 @@ Moments old_moments(const Mat& image)
 {
     Size s = image.size();
 
-    double m00, m01, m10, m11, m20, m02, m30, m12, m21, m03;
+    double m00 = 0.0, m01 = 0.0, m10 = 0.0, m11 = 0.0, m20 = 0.0, m02 = 0.0;
+    double m30 = 0.0, m12 = 0.0, m21 = 0.0, m03 = 0.0;
 
-    double t = (double)getTickCount();
+    // double t = (double)getTickCount();
 
     for(int y = 0; y < s.height; y++ )
     {
@@ -187,8 +187,8 @@ Moments old_moments(const Mat& image)
         }
     }
 
-    t = ((double)getTickCount() -t)/getTickFrequency();
-    cout << "OLD Loop Time: " << t << endl;
+    // t = ((double)getTickCount() -t)/getTickFrequency();
+    // cout << "OLD Loop Time: " << t << endl;
 
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
     return m;
