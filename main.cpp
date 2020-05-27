@@ -13,7 +13,7 @@ using namespace cv;
 int main() {
 
     Mat image;
-	image = imread("images\\largeimage.jpg", IMREAD_GRAYSCALE);
+	image = imread("images\\grayscale.jpg", IMREAD_GRAYSCALE);
 	if (!image.data)
     {
         cout << "Could not find image" << endl;

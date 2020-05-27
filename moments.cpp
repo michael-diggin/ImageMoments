@@ -38,10 +38,10 @@ Moments drt_moments(const Mat& image)
     for (int k=0; k<height+width; ++k)
     {
         d1[k] = k;
-        int k2 = k*k;
+        double k2 = static_cast<double>(k) * static_cast<double>(k);
         d2[k] = k2;
-        d3[k] = k2*k;
-        a3[k] = pow((k - width + 1), 3);
+        d3[k] = k2 * static_cast<double>(k);
+        a3[k] = pow(static_cast<double>(k - width + 1), 3);
     }
 
     // loop through image by pixel values
