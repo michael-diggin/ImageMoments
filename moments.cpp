@@ -44,7 +44,6 @@ Moments drt_moments(const Mat& image)
         a3[k] = pow(static_cast<double>(k - width + 1), 3);
     }
 
-    // loop through image by pixel values
     //projection arrays
     vector<long> vert(width, 0);
     vector<long> hor(height, 0);
@@ -57,6 +56,7 @@ Moments drt_moments(const Mat& image)
     long* dptr;
     long* aptr;
 
+    // loop through image by pixel values
     for (int i=0; i< height; ++i)
     {
         vptr = initvptr;
@@ -110,8 +110,6 @@ Moments opencv_moments(const Mat& image)
     double m00 = 0.0, m01 = 0.0, m10 = 0.0, m11 = 0.0, m20 = 0.0, m02 = 0.0;
     double m30 = 0.0, m12 = 0.0, m21 = 0.0, m03 = 0.0;
 
-    //double t = (double)getTickCount();
-
     for(int y = 0; y < s.height; y++ )
     {
         const uchar* ptr = image.ptr<uchar>(y);
@@ -144,8 +142,6 @@ Moments opencv_moments(const Mat& image)
         m00 += x0;             // m00
     }
 
-    //t = ((double)getTickCount() -t)/getTickFrequency();
-    //cout << "OCV Loop Time: " << t << endl;
 
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
     return m;
@@ -159,8 +155,6 @@ Moments old_moments(const Mat& image)
 
     double m00 = 0.0, m01 = 0.0, m10 = 0.0, m11 = 0.0, m20 = 0.0, m02 = 0.0;
     double m30 = 0.0, m12 = 0.0, m21 = 0.0, m03 = 0.0;
-
-    // double t = (double)getTickCount();
 
     for(int y = 0; y < s.height; y++ )
     {
@@ -187,8 +181,6 @@ Moments old_moments(const Mat& image)
         }
     }
 
-    // t = ((double)getTickCount() -t)/getTickFrequency();
-    // cout << "OLD Loop Time: " << t << endl;
 
     Moments m(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
     return m;

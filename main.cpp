@@ -13,7 +13,7 @@ using namespace cv;
 int main() {
 
     Mat image;
-	image = imread("images\\grayscale.jpg", IMREAD_GRAYSCALE);
+	image = imread("images\\1500x1500.jpg", IMREAD_GRAYSCALE);
 	if (!image.data)
     {
         cout << "Could not find image" << endl;
@@ -25,26 +25,27 @@ int main() {
 //   t0 = ((double)getTickCount()-t0)/getTickFrequency();
 
     if(!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS))
-        cout << "crap";
+        cout << "Priority process not set";
 
     if(!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL))
-        cout << "alos crap";
-    //waitKey(15000);
+        cout << "Thread priority not set";
 
     Moments m1, m2;
 
+    int trials = 1000;
+
     double t2 = (double)getTickCount();
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < trials; i++)
         m2 = opencv_moments(image);
     t2 = ((double)getTickCount()-t2)/getTickFrequency();
 
     double t1 = (double)getTickCount();
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < trials; i++)
         m1 = drt_moments(image);
     t1 = ((double)getTickCount()-t1)/getTickFrequency();
 
-    cout << "DRT Total: " << t1 << endl;
-    cout << "OCV Total: " << t2 << endl;
+    cout << "DRT Total: " << t1/trials << endl;
+    cout << "OCV Total: " << t2/trials << endl;
 
     cout << m1.m00 << "] m00 [" << m2.m00 << endl;
     cout << m1.m10 << "] m10 [" << m2.m10 << endl;
