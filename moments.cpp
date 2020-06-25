@@ -54,7 +54,6 @@ void drt_images(const Mat& image,
     const int width = s.width;
     const int height = s.height;
 
-    // loop through image by pixel values
     //projection arrays
     vector<long> vert(width, 0);
     vector<long> hor(height, 0);
@@ -68,6 +67,7 @@ void drt_images(const Mat& image,
     long* aptr;
     vptr = initvptr;
 
+    // loop through image by pixel values
     for (int i=0; i< height; ++i)
     {
         dptr = &diag[i];
@@ -190,9 +190,10 @@ Moments opencv_moments_double(const Mat& image)
     double m00 = 0.0, m01 = 0.0, m10 = 0.0, m11 = 0.0, m20 = 0.0, m02 = 0.0;
     double m30 = 0.0, m12 = 0.0, m21 = 0.0, m03 = 0.0;
 
-    for(int y = 0; y < s.height; y++ ) {
-        const uchar* p = image.ptr<uchar>(y);
-        double x0 = 0;
+    for(int y = 0; y < s.height; y++ )
+    {
+        const uchar* ptr = image.ptr<uchar>(y);
+        long x0 = 0;
         double x1 = 0.0, x2 = 0.0, x3 = 0.0;
 
         for(int x = 0; x < s.width; x++ ) {
