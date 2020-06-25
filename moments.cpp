@@ -192,7 +192,7 @@ Moments opencv_moments_double(const Mat& image)
 
     for(int y = 0; y < s.height; y++ )
     {
-        const uchar* ptr = image.ptr<uchar>(y);
+        const uchar* p = image.ptr<uchar>(y);
         long x0 = 0;
         double x1 = 0.0, x2 = 0.0, x3 = 0.0;
 
